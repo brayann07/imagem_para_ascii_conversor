@@ -5,6 +5,7 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageOps
 from ascii_magic import AsciiArt
+import time
 
 pasta_imagens = "imagens"
 extensoes_aceitas = (".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp")
@@ -12,13 +13,13 @@ imagem_carregada = None
 largura_escolhida = None
 caracteres_escolhidos = None
 rodando = True
+tempo_execucao = time.time()
 
 def pegar_nome_aleatorio():
     endpoint = "https://random-word-api.herokuapp.com/word?lang=pt-br&diff=1"
     resposta = requests.get(endpoint)
     resposta.raise_for_status()
     return resposta.json()[0] or "abacate"
-
 
 def ler_inteiro(texto):
     try:
@@ -31,21 +32,17 @@ def obter_largura():
         return largura_escolhida
     return max(40, shutil.get_terminal_size((100, 30)).columns - 1)
 
-
 def parametros_arte():
     return {
         "columns": obter_largura(),
         "char": caracteres_escolhidos,
     }
 
-
 def preparar_imagem():
     return imagem_carregada.convert("RGB")
 
-
 def criar_arte():
     return AsciiArt.from_pillow_image(preparar_imagem())
-
 
 def gerar_html_colorido(texto_arte):
     linhas = texto_arte.split("\n")
@@ -85,7 +82,6 @@ def gerar_html_colorido(texto_arte):
 
     return '<pre style="font-family:monospace;line-height:1">' + "\n".join(saida) + "</pre>"
 
-
 def carregar_imagem():
     global imagem_carregada
     opcao = ler_inteiro("1- Carregar imagem on-line\n2- Mostrar opções na pasta imagens\n> ")
@@ -123,7 +119,6 @@ def carregar_imagem():
     else:
         print("Erro ao escolher a opção.")
 
-
 def salvar_imagem():
     if imagem_carregada is None:
         print("Nenhuma imagem carregada ainda!")
@@ -149,7 +144,6 @@ def salvar_imagem():
         arquivo.write(texto)
     print(f"Foi salvo na pasta de imagens {caminho}")
 
-
 def inverter():
     global imagem_carregada
     if imagem_carregada is None:
@@ -166,7 +160,6 @@ def inverter():
         print("Opção inválida.")
         return
     mostrar_ascii()
-
 
 def gerar_ansi_colorido(texto_arte):
     linhas = texto_arte.split("\n")
@@ -194,19 +187,16 @@ def gerar_ansi_colorido(texto_arte):
 
     return "\n".join(saida)
 
-
 def mostrar_ascii():
     arte = criar_arte()
     texto = arte.to_ascii(monochrome=True, **parametros_arte())
     print(gerar_ansi_colorido(texto))
-
 
 def colorido():
     if imagem_carregada is None:
         print("Nenhuma imagem carregada...")
         return
     mostrar_ascii()
-
 
 def ajustar_largura():
     global largura_escolhida
@@ -221,7 +211,6 @@ def ajustar_largura():
     else:
         print("Valor inválido.")
 
-
 def escolher_caracteres():
     global caracteres_escolhidos
     opcao = ler_inteiro(
@@ -229,23 +218,22 @@ def escolher_caracteres():
     )
     if opcao == 1:
         caracteres_escolhidos = None
-        print("Caracteres padrão.")
+        print("padrão da biblioteca")
     elif opcao == 2:
         caracteres_escolhidos = " .:-=+*#%@"
-        print("Caracteres detalhados.")
+        print("caracteres melhorados")
     elif opcao == 3:
         caracteres_escolhidos = " ░▒▓█"
-        print("Caracteres em blocos.")
+        print("caracteres em blocos")
     elif opcao == 4:
-        digitados = input("Digite os caracteres do mais claro ao mais escuro: ")
+        digitados = input("digite os caracteres do mais claro ao mais escuro: ")
         if digitados:
             caracteres_escolhidos = digitados
-            print("Caracteres personalizados definidos.")
+            print("Foi atualizado!.")
         else:
-            print("Nada digitado.")
+            print("Nada foi digitado...")
     else:
         print("Opção inválida.")
-
 
 def sair():
     global rodando
@@ -253,6 +241,7 @@ def sair():
 
 while rodando:
     print("---\n1- Carregar imagem\n2- Salvar imagem\n3- Inverter\n4- Mostrar colorido""\n5- Ajustar largura\n6- Escolher caracteres\n7- Sair\n---")
+    print("ps : sempre bom dar um zoom no terminal")
     opcao = ler_inteiro("Selecione uma opção: ")
     match opcao:
         case 1:
@@ -273,3 +262,4 @@ while rodando:
             print("Opção inválida.")
 
 print("Até!")
+print(f"O programa rodou por {time.time() - tempo_execucao}")
